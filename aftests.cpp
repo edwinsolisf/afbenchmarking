@@ -71,6 +71,8 @@ void BM_af_matmul(benchmark::State& state)
     static af::array B;
     if (first)
     {        
+        af::deviceGC();
+
         // Get test values
         A = read_array(assets/"matmul_src.txt");
         B = read_array(assets/"matmul_weight.txt");
@@ -135,13 +137,15 @@ void BM_af_convolve(benchmark::State& state)
     const af::dim4 dilation = {1, 1, 0, 0};
     const af::dim4 stride   = {2, 1, 0, 0};
 
-    auto convolve = [padding, dilation, stride](const af::array& A, const af::array& B){
+    auto convolve = [padding, dilation, stride](const af::array& A, const af::array& B)
+    {
         auto C = af::convolve2NN(image, kernel, stride, padding, dilation);
         return C * 0.5 * (1. + af::erf(C / std::sqrt(2)));
     };
 
     if (first)
     {
+        af::deviceGC();
         /*
             mini-batch = 1
             input channels = 512
@@ -231,11 +235,14 @@ void BM_af_softmax(benchmark::State& state)
 
     if (first)
     {
+        af::deviceGC();
         // Get test values
-        A = read_array(assets/"softmax_src.txt");
+        A = read_array(assets/"softmax_src.txt").T();
 
-        auto ref = read_array(assets/"softmax_dst.txt");
-        auto C = softmax(A, 1);
+        auto ref = read_array(assets/"softmax_dst.txt").T();
+        auto C = softmax(A, 0);
+
+        std::cout << A.dims() << std::endl;
 
         std::cout << "is softmax op correct? = " << std::boolalpha
             << approx_equal(C, ref, 1e-5, 1e-5) << std::endl;
@@ -244,7 +251,7 @@ void BM_af_softmax(benchmark::State& state)
     }
 
     // First compile
-    auto temp = softmax(A);
+    auto temp = softmax(A, 0);
     temp.eval();
     af::sync();
     benchmark::DoNotOptimize(temp);
@@ -253,7 +260,7 @@ void BM_af_softmax(benchmark::State& state)
     af::array C;
     for (auto _ : state)
     {
-        C = softmax(A);
+        C = softmax(A, 0);
         af::eval(C);
         af::sync();
         benchmark::DoNotOptimize(C);
@@ -313,7 +320,7 @@ int main(int argc, char** argv)
     if (argc > 1)
     {
         device = std::stoi(argv[1]);
-        if (device >= af::devicecount())
+        if (device >= af::getDeviceCount())
         {
             std::cout << "No such Device, using default\n";
             device = 0;
