@@ -3,8 +3,10 @@ ArrayFire Testing
 
 To run the arrayfire benchmark
 ```sh
-    run_af.sh
+    run_af.sh #backend #device_id
 ```
+
+where `backend` maybe `cpu`, `opencl`, `cuda`, or `oneapi`, and `device_id` may be the one of the available devices on the specified backend. Leaving it blank uses the default backend and device.
 
 To run the onednn benchmark
 ```sh

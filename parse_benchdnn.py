@@ -1,9 +1,17 @@
 import pandas as pd
 import numpy as np
+import sys
 
 def main():
+    args = sys.argv
+    for i in range(1, len(args)):
+        filename = args[i]
+        print(f"-------------- {filename} --------------")
+        print_results(filename)
+
+def print_results(filename):
     lines = None
-    with open('./benchdnn_results.txt', 'r') as f:
+    with open(filename, 'r') as f:
         lines = f.readlines()[:-3]
         lines.insert(0, "driver,engine,mintime,avgtime,maxtime,createtime")
     with open('./bench.csv', 'w') as f:
