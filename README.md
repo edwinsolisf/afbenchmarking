@@ -10,6 +10,6 @@ where `backend` maybe `cpu`, `opencl`, `cuda`, or `oneapi`, and `device_id` may 
 
 To run the onednn benchmark
 ```sh
-    run_benchdnn.sh ${location}
+    run_benchdnn.sh ${location} ${engine} ${device}
 ```
-where location is the directory where `benchdnn` is located
+where `location` is the directory where `benchdnn` is located, `engine` is either `cpu` or `gpu`, and `device` is the device id from the list of devices for the selected engine. By default `engine=cpu`, `device=0`

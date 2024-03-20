@@ -8,8 +8,8 @@
 #include <benchmark/benchmark.h>
 
 static std::filesystem::path assets = "../../assets";
-static constexpr auto iterations = 20;
-static constexpr auto repetitions = 1000;
+static constexpr auto iterations = 2;
+static constexpr auto repetitions = 100;
 
 af::array read_array(std::filesystem::path filename)
 {
@@ -140,7 +140,7 @@ void BM_af_convolve(benchmark::State& state)
     auto convolve = [padding, dilation, stride](const af::array& A, const af::array& B)
     {
         auto C = af::convolve2NN(image, kernel, stride, padding, dilation);
-        return C * 0.5 * (1. + af::erf(C / std::sqrt(2)));
+        return C * 0.5 * (1. + af::erf(C / std::sqrt(2))); // post-op
     };
 
     if (first)
@@ -242,8 +242,6 @@ void BM_af_softmax(benchmark::State& state)
         auto ref = read_array(assets/"softmax_dst.txt").T();
         auto C = softmax(A, 0);
 
-        std::cout << A.dims() << std::endl;
-
         std::cout << "is softmax op correct? = " << std::boolalpha
             << approx_equal(C, ref, 1e-5, 1e-5) << std::endl;
 
@@ -290,6 +288,77 @@ BENCHMARK(BM_af_softmax)->Unit(benchmark::kMillisecond)
                             return result;
                        });
 
+void BM_af_inner(benchmark::State& state)
+{
+    static bool first = true;
+    static af::array A;
+    static af::array B;
+
+    auto inner = [](const af::array& A, const af::array& B)
+    {
+        af::array C = af::matmulNT(A, B);
+        return C * 0.5 * (1. + af::erf(C / std::sqrt(2)));
+    };
+
+    if (first)
+    {
+        af::deviceGC();
+
+        // Get test values
+        A = read_array(assets/"inner_src.txt");
+        B = read_array(assets/"inner_weights.txt");
+
+        auto ref = read_array(assets/"inner_dst.txt");
+        auto C = inner(A, B);
+
+        std::cout << C.dims() << " - " << ref.dims() << '\n';
+        
+        std::cout << "is inner op correct? = " << std::boolalpha
+            << approx_equal(C, ref, 1e-5, 1e-5) << std::endl;
+        // af_print(C(af::span, 0).T());
+        // af_print(C);
+        first = false;
+    }
+
+    // First compile
+    auto temp = inner(A, B);
+    temp.eval();
+    af::sync();
+    benchmark::DoNotOptimize(temp);
+
+    // Benchmark
+    af::array C;
+    for (auto _ : state)
+    {
+        C = inner(A, B);
+        af::eval(C);
+        af::sync();
+        benchmark::DoNotOptimize(C);
+    }
+}
+
+BENCHMARK(BM_af_inner)->Unit(benchmark::kMillisecond)
+                       ->Iterations(iterations)
+                       ->Repetitions(repetitions)
+                       ->ReportAggregatesOnly(true)
+                       ->ComputeStatistics("max", [](const std::vector<double>& v) {
+                            return *std::max_element(std::begin(v), std::end(v));
+                       })
+                       ->ComputeStatistics("min", [](const std::vector<double>& v) {
+                            return *std::min_element(std::begin(v), std::end(v));
+                       })
+                       ->ComputeStatistics("99%", [](const std::vector<double>& v) {
+                            std::vector<double> sorted(v.cbegin(), v.cend());
+                            std::sort(sorted.begin(), sorted.end());
+                            auto count = sorted.size();
+                            auto result = (*(sorted.begin() + count * 0.99 - 1) +
+                                                (size_t(0.99 * count) != count ?
+                                                    *(sorted.begin() + count * 0.99) :
+                                                    *(sorted.begin() + count * 0.99 - 1))
+                                            ) / 2;
+
+                            return result;
+                       });
 
 int main(int argc, char** argv)
 {
