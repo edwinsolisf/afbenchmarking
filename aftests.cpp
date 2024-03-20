@@ -8,8 +8,8 @@
 #include <benchmark/benchmark.h>
 
 static std::filesystem::path assets = "../../assets";
-static constexpr auto iterations = 2;
-static constexpr auto repetitions = 100;
+static constexpr auto iterations = 20;
+static constexpr auto repetitions = 1000;
 
 af::array read_array(std::filesystem::path filename)
 {

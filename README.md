@@ -10,6 +10,8 @@ where `backend` maybe `cpu`, `opencl`, `cuda`, or `oneapi`, and `device_id` may 
 
 To run the onednn benchmark
 ```sh
-    run_benchdnn.sh ${location} ${engine} ${device}
+    run_benchdnn.sh #location #engine #device
 ```
-where `location` is the directory where `benchdnn` is located, `engine` is either `cpu` or `gpu`, and `device` is the device id from the list of devices for the selected engine. By default `engine=cpu`, `device=0`
+where `location` is the directory where `benchdnn` is located, `engine` is either `cpu` or `gpu`, and `device` is the device id from the list of devices for the selected engine. By default `engine=cpu`, `device=0`.
+
+Depending on the location of `benchdnn` and the onednn libraries, you might need to prefix it with `LD_PRELOAD=$(location of libdnnl)`.
