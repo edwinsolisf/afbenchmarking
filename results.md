@@ -22,6 +22,8 @@ Platform: CUDA Runtime 12.3, Driver: 545.29.06
 |  conv    |             $1.48\pm0.02$             |             $2.01\pm0.02$                |  $$\color{lightgreen}0.91\pm0.03$$     |
 |  softmax |             $1.83\pm0.04$             |             $1.84\pm0.03$                |  $$\color{lightgreen}0.978\pm0.001$$   |
 |  inner   | $${\color{lightgreen}0.737\pm0.014}$$ |             $1.20\pm0.01$                |            $1.29\pm 0.03$              |
+
+
 Benchdnn did not run for the post operation `eltwise_gelu_erf`, so it was replaced for `eltwise_relu` for the convolution and softmax tests as a approximate reference point. OneDNN used SYCL for kernel invocation which used cudnn for certain operations.
 
 
@@ -31,5 +33,5 @@ ArrayFire v3.9.0 (oneAPI, 64-bit Linux, build 4061db86e)
 |:--------:|:-----------------------------:|:----------------------------------------:|:-------------------------------------:|
 |  matmul  |             $9.87\pm0.21$     |               $14.3\pm2.7$               |  $${\color{lightgreen}4.42\pm0.09}$$  |
 |  conv    |             $37.4\pm0.8$      |              $28.1\pm2.8$                |  $${\color{lightgreen}4.61\pm0.16}$$  |
-|  softmax |             $32.4\pm0.4$      |              $49.5\pm0.5$                |$${\color{lightgreen}3.07\pm0.06}      |
-|  inner   |        $14.0\pm0.4$           |             $9.89\pm0.22$                |$${\color{lightgreen}5.59\pm0.11}      |
+|  softmax |             $32.4\pm0.4$      |              $49.5\pm0.5$                |$${\color{lightgreen}3.07\pm0.06}$$    |
+|  inner   |        $14.0\pm0.4$           |             $9.89\pm0.22$                |$${\color{lightgreen}5.59\pm0.11}$$    |
