@@ -21,10 +21,11 @@ We were able to find the following operations:
 
 |   Primitive   |           Times used                              | Approximate Runtime Contribution |
 |:-------------:|:-------------------------------------------------:|:--------------------------------:|
-|     matmul    | 3x (1x8x1500x1500:1x8x1500x64)                    |             $48.5\%$             |
-| inner product | 6x (1500x512:512x2048) + 12x(1500x512:512x512)    |             $33.6\%$             |
-|    softmax    | 6x (1x8x1500x1500)                                |             $10.1\%$             |
-|    convolve   | ic512oc512_iw3000ow1500kw3sw2pw1 + ic80oc512_iw3000ow3000kw3sw1pw1|             $4.4\%$              |
+|     matmul    | 13x (1x8x1500x1500:1x8x1500x64)                    |             $48.5\\%$           |
+| inner product | 6x (1500x512:512x2048) + 12x(1500x512:512x512)    |             $33.6\\%$            |
+|    softmax    | 6x (1x8x1500x1500)                                |             $10.1\\%$            |
+|    convolve   | ic512oc512_iw3000ow1500kw3sw2pw1 + ic80oc512_iw3000ow3000kw3sw1pw1|$4.4\\%$              |
+| Total         |             ------                                |            $96.6\\%$             |
 
 Using this information, we set up benchmarks testing each of the primitives in oneDNN with benchdnn and an equivalent ArrayFire implementation using Google Benchmark.
 
@@ -61,6 +62,10 @@ On Intel(R) Level-Zero: Intel(R) Arc(TM) A770 Graphics, 15473 MB (fp16)
 
 ![Speedup on A770](assets/A770.svg)
 
+Using the expression 13*`matmul_runtime`+(6+12\*512/2048)\*`inner_runtime`+6*`softmax_runtime`+2*`conv_runtime`, we can approximate the total expected runtime of the model.
+
+![Total speedup on A770](assets/A770-total.svg)
+
 ### GPU Test on Nvidia Tesla T4
 
 Benchdnn did not run for the post operation `eltwise_gelu_erf`, so it was replaced for `eltwise_relu` for the convolution and softmax tests as a approximate reference point. OneDNN used SYCL for kernel invocation which used cudnn for certain operations.
@@ -76,3 +81,5 @@ Platform: CUDA Runtime 12.3, Driver: 545.29.06
 |  inner   | $${\color{lightgreen}0.737\pm0.014}$$ |             $1.20\pm0.01$                |            $1.29\pm 0.03$              |
 
 ![Speedup on T4](assets/T4.svg)
+
+![Total speedup on T4](assets/T4-total.svg)
