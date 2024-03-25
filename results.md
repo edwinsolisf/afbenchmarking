@@ -79,7 +79,7 @@ With Blocking disabled
 ArrayFire v3.9.0 (CUDA, 64-bit Linux, build 4061db86e)
 Platform: CUDA Runtime 12.3, Driver: 545.29.06
 [0] Tesla T4, 14930 MB, CUDA Compute 7.5
-|   Test   |           ArrayFire Cuda              |            ArrayFire OpenCL              | OneDNN (relu instead of gelu_erf)      |
+|   Test   |           ArrayFire Cuda              |            ArrayFire OpenCL              | OneDNN                            |
 |:--------:|:-------------------------------------:|:----------------------------------------:|:--------------------------------------:|
 |  matmul  |$${\color{lightgreen}0.600\pm0.039}$$  |               $2.25\pm0.15$              |            $1.04\pm0.02$               |
 |  conv    |             $1.48\pm0.02$             |             $2.01\pm0.02$                |  $$\color{lightgreen}0.91\pm0.03$$     |
